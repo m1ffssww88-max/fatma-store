@@ -231,19 +231,25 @@
         .product-image-container {
             position: relative;
             width: 100%;
-            height: 280px;
             overflow: hidden;
+            background: #f6ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-in;
         }
 
         .product-image {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
+            max-height: 420px;
+            display: block;
+            object-fit: contain;
             transition: transform 0.5s;
         }
 
         .product-card:hover .product-image {
-            transform: scale(1.08);
+            transform: scale(1.05);
         }
 
         .discount-badge {
@@ -353,6 +359,30 @@
             transform: rotate(90deg);
         }
 
+        /* Lightbox: عرض الصورة كاملة بدون قص */
+        .lightbox-overlay {
+            background: rgba(0,0,0,0.92);
+        }
+
+        .lightbox-overlay .modal-close {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+        }
+
+        .lightbox-image {
+            max-width: 92vw;
+            max-height: 92vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            cursor: default;
+        }
+
         .modal-body {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -367,12 +397,18 @@
             position: relative;
             height: 100%;
             min-height: 400px;
+            background: #f6ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: zoom-in;
         }
 
         .modal-image {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             border-radius: 0 20px 20px 0;
         }
 
@@ -963,6 +999,34 @@
         #adminOverlay .action-btn.edit:hover { background: var(--blue); color: white; }
         #adminOverlay .action-btn.delete { background: rgba(255, 59, 48, 0.1); color: var(--red); }
         #adminOverlay .action-btn.delete:hover { background: var(--red); color: white; }
+
+        /* بطاقات المنتجات في لوحة الإدارة - كل صف يحتوي منتجين */
+        #adminOverlay .admin-products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        @media (max-width: 480px) { #adminOverlay .admin-products-grid { grid-template-columns: 1fr 1fr; gap: 10px; } }
+        #adminOverlay .admin-prod-card { background: #fff; border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; cursor: pointer; transition: all 0.25s; position: relative; }
+        #adminOverlay .admin-prod-card:hover { border-color: var(--primary-pink); box-shadow: 0 8px 20px rgba(233, 30, 99, 0.12); transform: translateY(-2px); }
+        #adminOverlay .apc-thumb { width: 100%; aspect-ratio: 1 / 1; background: #f6ecef; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #adminOverlay .apc-thumb img { width: 100%; height: 100%; object-fit: contain; }
+        #adminOverlay .apc-discount { position: absolute; top: 8px; right: 8px; background: var(--red); color: #fff; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 20px; }
+        #adminOverlay .apc-body { padding: 10px 12px 12px; }
+        #adminOverlay .apc-name { font-size: 13.5px; font-weight: bold; color: var(--text-dark); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #adminOverlay .apc-meta { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+        #adminOverlay .apc-price { font-size: 14px; font-weight: bold; color: var(--primary-pink); }
+        #adminOverlay .apc-cat { font-size: 10.5px; padding: 3px 8px; background: rgba(233,30,99,0.1); color: var(--primary-pink); border-radius: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
+
+        /* مودال تفاصيل المنتج بالإدارة */
+        #adminOverlay .prod-details-img { width: 100%; aspect-ratio: 4/3; background: #f6ecef; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 14px; margin-bottom: 18px; cursor: zoom-in; }
+        #adminOverlay .prod-details-img img { width: 100%; height: 100%; object-fit: contain; }
+        #adminOverlay .prod-details-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        #adminOverlay .prod-details-row:last-of-type { border-bottom: none; }
+        #adminOverlay .prod-details-row span:first-child { color: var(--text-gray); }
+        #adminOverlay .prod-details-row span:last-child { color: var(--text-dark); font-weight: 600; }
+        #adminOverlay .prod-details-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        #adminOverlay .prod-details-actions button { padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+        #adminOverlay .pd-edit-btn { background: rgba(0,122,255,0.1); color: var(--blue); }
+        #adminOverlay .pd-edit-btn:hover { background: var(--blue); color: #fff; }
+        #adminOverlay .pd-delete-btn { background: rgba(255,59,48,0.1); color: var(--red); }
+        #adminOverlay .pd-delete-btn:hover { background: var(--red); color: #fff; }
         #adminOverlay .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
         #adminOverlay .modal-overlay.active { display: flex; }
         #adminOverlay .modal-content { background: #ffffff; border-radius: 20px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border-color); animation: admModalSlide 0.3s ease; }
@@ -1359,7 +1423,7 @@
             <button class="modal-close" onclick="closeProductModal()"><i class="fas fa-times"></i></button>
             <div class="modal-body">
                 <div class="modal-image-section">
-                    <img class="modal-image" id="modalImage" src="" alt="">
+                    <img class="modal-image" id="modalImage" src="" alt="" onclick="event.stopPropagation(); openLightbox(this.src)">
                 </div>
                 <div class="modal-details">
                     <h2 class="modal-product-name" id="modalProductName"></h2>
@@ -1386,6 +1450,12 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Image Lightbox (عرض الصورة كاملة) -->
+    <div class="modal-overlay lightbox-overlay" id="imageLightbox" onclick="closeLightbox()">
+        <button class="modal-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+        <img class="lightbox-image" id="lightboxImage" src="" alt="">
     </div>
 
     <!-- Order Modal -->
@@ -1710,7 +1780,7 @@
             grid.innerHTML = filtered.map(p => `
                 <div class="product-card" onclick="openProduct(${p.id})">
                     <div class="product-image-container">
-                        <img class="product-image" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.alt='تعذر تحميل الصورة';this.style.objectFit='contain';this.style.opacity='0.35';">
+                        <img class="product-image" src="${p.image}" alt="${p.name}" loading="lazy" onclick="event.stopPropagation(); openLightbox('${p.image}')" onerror="this.onerror=null;this.alt='تعذر تحميل الصورة';this.style.opacity='0.35';">
                         <div class="discount-badge">خصم ${p.discount}</div>
                     </div>
                     <div class="product-info">
@@ -1763,6 +1833,22 @@
         function closeProductModal() {
             document.getElementById('productModal').classList.remove('active');
             document.body.style.overflow = '';
+        }
+
+        // ===================== IMAGE LIGHTBOX =====================
+        // فتح الصورة بحجمها الكامل بدون أي قص عند الضغط عليها
+        function openLightbox(src) {
+            document.getElementById('lightboxImage').src = src;
+            document.getElementById('imageLightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            document.getElementById('imageLightbox').classList.remove('active');
+            // نرجع overflow فقط إذا مافي مودال ثاني مفتوح
+            if (!document.getElementById('productModal').classList.contains('active')) {
+                document.body.style.overflow = '';
+            }
         }
 
         function selectColor(color) {
@@ -2098,22 +2184,8 @@
                         <i class="fas fa-plus"></i> إضافة منتج جديد
                     </button>
                 </div>
-                <div class="section-card" style="overflow-x: auto;">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th style="width:60px">#</th>
-                                <th>الصورة</th>
-                                <th>اسم المنتج</th>
-                                <th>التصنيف</th>
-                                <th>السعر</th>
-                                <th>الخصم</th>
-                                <th>الألوان</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productsTable"></tbody>
-                    </table>
+                <div class="section-card">
+                    <div class="admin-products-grid" id="productsTable"></div>
                 </div>
             </div>
 
@@ -2328,6 +2400,31 @@
                         <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> حفظ المنتج</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRODUCT DETAILS MODAL (الإدارة) -->
+    <div class="modal-overlay" id="prodDetailsModal">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-box"></i> تفاصيل المنتج</h3>
+                <button class="modal-close" onclick="closeProductDetails()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="prod-details-img" onclick="openLightbox(document.getElementById('pdImage').src)">
+                    <img id="pdImage" src="" alt="">
+                </div>
+                <div class="prod-details-row"><span>اسم المنتج</span><span id="pdName"></span></div>
+                <div class="prod-details-row"><span>التصنيف</span><span id="pdCategory"></span></div>
+                <div class="prod-details-row"><span>السعر الحالي</span><span id="pdPrice"></span></div>
+                <div class="prod-details-row"><span>السعر قبل الخصم</span><span id="pdOldPrice"></span></div>
+                <div class="prod-details-row"><span>نسبة الخصم</span><span id="pdDiscount"></span></div>
+                <div class="prod-details-row"><span>الألوان المتوفرة</span><span id="pdColors"></span></div>
+                <div class="prod-details-actions">
+                    <button class="pd-edit-btn" id="pdEditBtn"><i class="fas fa-pen"></i> تعديل</button>
+                    <button class="pd-delete-btn" id="pdDeleteBtn"><i class="fas fa-trash"></i> حذف</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2615,30 +2712,53 @@
 
 
         function renderProductsTable() {
-            const tbody = document.getElementById('productsTable');
-            tbody.innerHTML = products.map(p => {
+            const grid = document.getElementById('productsTable');
+            if (products.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-gray);"><i class="fas fa-box-open" style="font-size:32px;display:block;margin-bottom:10px;color:var(--border-color);"></i>لا توجد منتجات مضافة بعد</div>';
+                return;
+            }
+            grid.innerHTML = products.map(p => {
                 const cat = categories.find(c => c.id === p.category);
-                const availableColors = (p.colors || []).join(', ');
-                return `<tr>
-                    <td>${p.id}</td>
-                    <td><img src="${p.image}" class="product-thumb" onerror="this.src='https://via.placeholder.com/50/222/fff?text=NO+IMG'"></td>
-                    <td><strong>${p.name}</strong></td>
-                    <td><span class="badge badge-green">${cat?.name || p.category}</span></td>
-                    <td>${p.price.toLocaleString('en-US')}</td>
-                    <td><span class="badge badge-gray">${p.discount || '-'}</span></td>
-                    <td>${availableColors || '<span style="color:#555">لا يوجد</span>'}</td>
-                    <td>
-                        <div class="action-btns">
-                            <button class="action-btn edit" onclick="editProduct(${p.id})" title="تعديل">
-                                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                            </button>
-                            <button class="action-btn delete" onclick="deleteProduct(${p.id})" title="حذف">
-                                <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
-                            </button>
+                return `<div class="admin-prod-card" onclick="showProductDetails(${p.id})">
+                    <div class="apc-thumb">
+                        <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/200/f6ecef/999?text=NO+IMG'">
+                    </div>
+                    ${p.discount ? `<div class="apc-discount">خصم ${p.discount}</div>` : ''}
+                    <div class="apc-body">
+                        <div class="apc-name" title="${p.name}">${p.name}</div>
+                        <div class="apc-meta">
+                            <span class="apc-price">${p.price.toLocaleString('en-US')} د.ع</span>
+                            <span class="apc-cat" title="${cat?.name || p.category}">${cat?.name || p.category}</span>
                         </div>
-                    </td>
-                </tr>`;
+                    </div>
+                </div>`;
             }).join('');
+        }
+
+        // ===================== PRODUCT DETAILS (بطاقة الإدارة) =====================
+        function showProductDetails(id) {
+            const p = products.find(pr => pr.id === id);
+            if (!p) return;
+            const cat = categories.find(c => c.id === p.category);
+            const availableColors = (p.colors || []).join('، ');
+
+            document.getElementById('pdImage').src = p.image;
+            document.getElementById('pdImage').onerror = function(){ this.src = 'https://via.placeholder.com/300/f6ecef/999?text=NO+IMG'; };
+            document.getElementById('pdName').textContent = p.name;
+            document.getElementById('pdCategory').textContent = cat?.name || p.category;
+            document.getElementById('pdPrice').textContent = p.price.toLocaleString('en-US') + ' د.ع';
+            document.getElementById('pdOldPrice').textContent = p.oldPrice ? (p.oldPrice.toLocaleString('en-US') + ' د.ع') : '-';
+            document.getElementById('pdDiscount').textContent = p.discount || '-';
+            document.getElementById('pdColors').textContent = availableColors || 'لا يوجد';
+
+            document.getElementById('pdEditBtn').onclick = () => { closeProductDetails(); editProduct(p.id); };
+            document.getElementById('pdDeleteBtn').onclick = () => { closeProductDetails(); deleteProduct(p.id); };
+
+            document.getElementById('prodDetailsModal').classList.add('active');
+        }
+
+        function closeProductDetails() {
+            document.getElementById('prodDetailsModal').classList.remove('active');
         }
 
         // ===================== PRODUCT MODAL =====================
@@ -3050,9 +3170,9 @@ body{background:#faf3f5;color:#1a1a1a;}
 .pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:25px;}
 .pc{background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #f0d0d8;transition:all 0.3s;}
 .pc:hover{transform:translateY(-8px);border-color:#e91e63;box-shadow:0 12px 35px rgba(233,30,99,0.18);}
-.iw{position:relative;width:100%;height:280px;overflow:hidden;}
-.iw img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s;}
-.pc:hover .iw img{transform:scale(1.08);}
+.iw{position:relative;width:100%;overflow:hidden;background:#f6ecef;display:flex;align-items:center;justify-content:center;}
+.iw img{width:100%;height:auto;max-height:420px;display:block;object-fit:contain;transition:transform 0.5s;}
+.pc:hover .iw img{transform:scale(1.05);}
 .db{position:absolute;top:15px;right:15px;background:#ff3b30;color:white;padding:6px 14px;border-radius:20px;font-weight:bold;font-size:14px;}
 .pi{padding:20px;}
 .pi h3{font-size:18px;font-weight:bold;margin-bottom:10px;color:#1a1a1a;}
@@ -3101,6 +3221,8 @@ body{background:#faf3f5;color:#1a1a1a;}
     window.doLogin = doLogin;
     window.doLogout = doLogout;
     window.editProduct = editProduct;
+    window.showProductDetails = showProductDetails;
+    window.closeProductDetails = closeProductDetails;
     window.exportData = exportData;
     window.openPassModal = openPassModal;
     window.openProductModal = openProductModal;
