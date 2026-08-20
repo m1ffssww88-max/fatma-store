@@ -1936,8 +1936,8 @@
         }
 
         // يبني رسالة واتساب جاهزة بكل تفاصيل الطلب ويفتحها مباشرة على رقم
-        // المتجر (storeSettings.whatsappNumber). ملاحظة: واتساب لا يدعم إرفاق
-        // صورة تلقائياً عبر هذا الرابط، لذلك نرسل رابط الصورة كنص قابل للفتح.
+        // المتجر (storeSettings.whatsappNumber). رابط المنتج المرسل بالرسالة
+        // يفتح نفس صفحة المنتج (وفيها الصورة)، فما داعي نرسل الصورة كنص منفصل.
         function openWhatsAppOrder(order) {
             const number = (storeSettings.whatsappNumber || '').replace(/[^0-9]/g, '');
             if (!number) {
@@ -1966,8 +1966,7 @@
             if (order.color) lines.push(`اللون: ${order.color}`);
             lines.push(
                 `السعر: ${Number(order.price).toLocaleString('en-US')} د.ع`,
-                `رابط المنتج: ${location.href.split('#')[0].split('?')[0]}?product=${order.productId}`,
-                `صورة المنتج: ${order.productImage}`
+                `رابط المنتج: ${location.href.split('#')[0].split('?')[0]}?product=${order.productId}`
             );
 
             const text = encodeURIComponent(lines.join('\n'));
@@ -2858,7 +2857,12 @@
                 const canvas = document.createElement('canvas');
                 canvas.width = Math.max(1, Math.round(width));
                 canvas.height = Math.max(1, Math.round(height));
-                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                const ctx = canvas.getContext('2d');
+                // نملي الخلفية بالأبيض أول: JPEG ما تدعم الشفافية، فأي صورة فيها
+                // خلفية شفافة (PNG مثلاً) بدون هذا السطر تتحول تلقائياً لمربع أسود.
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 dataUrl = canvas.toDataURL('image/jpeg', quality);
 
                 // تقدير حجم البيانات الفعلي بالبايت (base64 تقريباً 0.75 بايت لكل حرف)
