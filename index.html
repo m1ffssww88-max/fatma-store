@@ -15,6 +15,9 @@
     </script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Cropper.js: مكتبة قص الصور الاحترافية (تُستخدم في لوحة تحكم الأدمن عند رفع/تعديل صور المنتجات) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
     <style>
         :root {
             --primary-pink: #e91e63;
@@ -1077,6 +1080,55 @@
         #adminOverlay .image-preview-box img { width: 100%; height: 100%; object-fit: cover; }
         #adminOverlay .image-upload-controls { flex: 1; min-width: 220px; }
         #adminOverlay .image-hint { color: var(--text-gray); font-size: 12px; margin-top: 6px; }
+        #adminOverlay .image-preview-box { position: relative; }
+        #adminOverlay .recrop-btn {
+            position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+            color: #fff; border: none; border-radius: 20px; padding: 4px 10px;
+            font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap;
+            box-shadow: 0 3px 10px rgba(233,30,99,0.35); display: none; align-items: center; gap: 5px;
+        }
+        #adminOverlay .recrop-btn.show { display: inline-flex; }
+        #adminOverlay .recrop-btn:hover { transform: translateX(-50%) translateY(-2px); }
+
+        /* ============ CROP MODAL ============ */
+        #cropModal.modal-overlay { z-index: 2000; }
+        #cropModal .modal-content { max-width: 560px; background: #1a1a1a; }
+        #cropModal .modal-header { border-bottom: 1px solid #333; }
+        #cropModal .modal-header h3 { color: var(--primary-pink); }
+        #cropModal .modal-close { color: #ccc; }
+        #cropModal .modal-close:hover { background: var(--primary-pink); color: #fff; }
+        #cropModal .modal-body { padding: 20px; }
+        .crop-stage {
+            width: 100%; height: 360px; background: #0f0f0f; border-radius: 12px;
+            overflow: hidden; border: 1px solid #333;
+        }
+        .crop-stage img { display: block; max-width: 100%; }
+        .crop-ratio-row {
+            display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 16px;
+        }
+        .crop-ratio-btn {
+            padding: 8px 16px; border-radius: 20px; border: 2px solid #444; background: #262626;
+            color: #ddd; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.25s;
+        }
+        .crop-ratio-btn:hover { border-color: var(--primary-pink); }
+        .crop-ratio-btn.active {
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+            border-color: var(--primary-pink); color: #fff;
+        }
+        .crop-tools-row {
+            display: flex; gap: 8px; justify-content: center; margin-top: 12px;
+        }
+        .crop-tool-btn {
+            width: 42px; height: 42px; border-radius: 50%; border: 2px solid #444;
+            background: #262626; color: #ddd; cursor: pointer; font-size: 15px;
+            display: flex; align-items: center; justify-content: center; transition: all 0.25s;
+        }
+        .crop-tool-btn:hover { border-color: var(--primary-pink); color: var(--primary-pink); }
+        .crop-actions-row {
+            display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;
+        }
+        .crop-hint { color: #999; font-size: 12px; text-align: center; margin-top: 14px; }
 
 /* Admin access icon (fixed, outside adminOverlay) */
 .admin-access-icon {
@@ -2368,6 +2420,9 @@
                             <div class="image-preview-box" id="prodImagePreviewBox">
                                 <img id="prodImagePreview" src="" alt="" style="display:none;" onerror="handleImageError()">
                                 <span id="prodImagePreviewHint">لا توجد صورة</span>
+                                <button type="button" class="recrop-btn" id="recropBtn" onclick="openCropperForCurrentImage()">
+                                    <i class="fas fa-crop-alt"></i> تعديل القص
+                                </button>
                             </div>
                             <div class="image-upload-controls">
                                 <input type="text" class="form-input" id="prodImage" placeholder="الصق رابط صورة (اختياري)" style="margin-bottom:10px;">
@@ -2375,7 +2430,7 @@
                                 <button type="button" class="btn btn-secondary" onclick="document.getElementById('prodImageFile').click()">
                                     <i class="fas fa-camera"></i> رفع صورة من الجهاز
                                 </button>
-                                <p class="image-hint">تكدر تلصق رابط صورة من الإنترنت أو ترفع صورة مباشرة من كاميرا جهازك أو معرض الصور — مو شرط رابط.</p>
+                                <p class="image-hint">تكدر تلصق رابط صورة من الإنترنت أو ترفع صورة مباشرة من كاميرا جهازك أو معرض الصور — مو شرط رابط. بعد رفع الصورة راح تنفتح أداة قص احترافية قبل الحفظ.</p>
                             </div>
                         </div>
                     </div>
@@ -2399,6 +2454,40 @@
                         <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> حفظ المنتج</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- CROP MODAL: قص احترافي للصورة قبل رفعها/حفظها -->
+    <div class="modal-overlay" id="cropModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-crop-alt"></i> قص الصورة</h3>
+                <button class="modal-close" onclick="closeCropModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="crop-stage">
+                    <img id="cropTargetImage" src="" alt="crop target">
+                </div>
+                <div class="crop-ratio-row">
+                    <button type="button" class="crop-ratio-btn active" onclick="setCropRatio(1, this)">مربع 1:1</button>
+                    <button type="button" class="crop-ratio-btn" onclick="setCropRatio(0.8, this)">4:5</button>
+                    <button type="button" class="crop-ratio-btn" onclick="setCropRatio(1.777, this)">16:9</button>
+                    <button type="button" class="crop-ratio-btn" onclick="setCropRatio(0, this)">حر</button>
+                </div>
+                <div class="crop-tools-row">
+                    <button type="button" class="crop-tool-btn" title="تدوير يسار" onclick="cropperInstance && cropperInstance.rotate(-90)"><i class="fas fa-undo"></i></button>
+                    <button type="button" class="crop-tool-btn" title="تكبير" onclick="cropperInstance && cropperInstance.zoom(0.1)"><i class="fas fa-search-plus"></i></button>
+                    <button type="button" class="crop-tool-btn" title="تصغير" onclick="cropperInstance && cropperInstance.zoom(-0.1)"><i class="fas fa-search-minus"></i></button>
+                    <button type="button" class="crop-tool-btn" title="تدوير يمين" onclick="cropperInstance && cropperInstance.rotate(90)"><i class="fas fa-redo"></i></button>
+                    <button type="button" class="crop-tool-btn" title="عكس أفقي" onclick="cropperInstance && cropperInstance.scaleX((cropperInstance.getData().scaleX || 1) * -1)"><i class="fas fa-arrows-alt-h"></i></button>
+                    <button type="button" class="crop-tool-btn" title="إعادة ضبط" onclick="cropperInstance && cropperInstance.reset()"><i class="fas fa-sync-alt"></i></button>
+                </div>
+                <p class="crop-hint">اسحب لتحريك الإطار، واستخدم عجلة الفأرة أو أزرار التكبير للتحكم بحجم القص. النتيجة تُحفظ بجودة عالية.</p>
+                <div class="crop-actions-row">
+                    <button type="button" class="btn btn-secondary" onclick="closeCropModal()">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmCrop()"><i class="fas fa-check"></i> تأكيد القص</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2817,25 +2906,123 @@
 
             const reader = new FileReader();
             reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    // كل منتج له مستند مستقل بحد أقصى 1 ميجابايت على Firestore،
-                    // فنضغط الصورة تدريجياً (جودة ثم أبعاد) لحد ما توصل لحجم آمن
-                    // بعيد عن هذا الحد (يترك مساحة لبقية حقول المنتج).
-                    const dataUrl = compressImageToLimit(img, 700 * 1024);
-
-                    document.getElementById('prodImage').value = dataUrl;
-                    updateImagePreview(dataUrl);
-                    showAdminToast('تم رفع الصورة بنجاح');
-                };
-                img.onerror = () => showAdminToast('تعذر قراءة الصورة');
-                img.src = e.target.result;
+                // بدل الحفظ المباشر، نفتح أداة القص الاحترافية أول عشان الأدمن
+                // يقص الصورة بالشكل المناسب قبل ما تنضغط وتترفع للمتصفح.
+                openCropModal(e.target.result, (croppedDataUrl) => {
+                    finalizeCroppedImage(croppedDataUrl);
+                });
             };
             reader.onerror = () => showAdminToast('تعذر قراءة الملف');
             reader.readAsDataURL(file);
 
             // reset so selecting the same file again still fires 'change'
             input.value = '';
+        }
+
+        // بعد قص الصورة (سواء صورة جديدة أو صورة كانت موجودة مسبقاً) نضغطها
+        // لحد آمن ونحدّث الحقل والمعاينة.
+        function finalizeCroppedImage(croppedDataUrl) {
+            const img = new Image();
+            img.onload = () => {
+                const dataUrl = compressImageToLimit(img, 700 * 1024);
+                document.getElementById('prodImage').value = dataUrl;
+                updateImagePreview(dataUrl);
+                showAdminToast('تم قص الصورة بنجاح');
+            };
+            img.onerror = () => showAdminToast('تعذر معالجة الصورة بعد القص');
+            img.src = croppedDataUrl;
+        }
+
+        // ================= CROPPER (قص الصور) =================
+        let cropperInstance = null;
+        let cropConfirmCallback = null;
+
+        // يفتح نافذة القص على أي صورة (رابط أو data URL) وينفذ callback بالنتيجة
+        function openCropModal(imageSrc, callback) {
+            const cropImg = document.getElementById('cropTargetImage');
+            cropConfirmCallback = callback;
+
+            // لو الصورة رابط خارجي، نحاول نفعّل CORS حتى نقدر نصدّر النتيجة كـ canvas.
+            // إذا الرابط ما يدعم CORS، التصدير راح يفشل ونوضح ذلك للأدمن بدل خطأ صامت.
+            if (imageSrc && !imageSrc.startsWith('data:')) {
+                cropImg.crossOrigin = 'anonymous';
+            } else {
+                cropImg.removeAttribute('crossorigin');
+            }
+
+            cropImg.src = imageSrc;
+
+            document.querySelectorAll('.crop-ratio-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.crop-ratio-btn').classList.add('active');
+
+            document.getElementById('cropModal').classList.add('active');
+
+            const initCropper = () => {
+                if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+                cropperInstance = new Cropper(cropImg, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.95,
+                    background: false,
+                    responsive: true,
+                    guides: true,
+                    center: true,
+                    movable: true,
+                    zoomable: true,
+                    scalable: true,
+                    rotatable: true
+                });
+            };
+
+            if (cropImg.complete) initCropper();
+            else cropImg.onload = initCropper;
+        }
+
+        function setCropRatio(ratio, btn) {
+            document.querySelectorAll('.crop-ratio-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (cropperInstance) {
+                cropperInstance.setAspectRatio(ratio === 0 ? NaN : ratio);
+            }
+        }
+
+        function closeCropModal() {
+            document.getElementById('cropModal').classList.remove('active');
+            if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+            cropConfirmCallback = null;
+        }
+
+        function confirmCrop() {
+            if (!cropperInstance) return;
+            try {
+                const canvas = cropperInstance.getCroppedCanvas({
+                    maxWidth: 1600,
+                    maxHeight: 1600,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high'
+                });
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+                const cb = cropConfirmCallback;
+                closeCropModal();
+                if (cb) cb(dataUrl);
+            } catch (err) {
+                console.error('تعذر تصدير الصورة بعد القص:', err);
+                showAdminToast('تعذر قص هذا الرابط الخارجي (لا يدعم CORS)، جرّب رفع الصورة من الجهاز بدلاً من الرابط');
+            }
+        }
+
+        // زر "تعديل القص" بجانب معاينة الصورة: يفتح القص على الصورة الحالية
+        // (سواء صورة مرفوعة سابقاً أو صورة منتج قيد التعديل)
+        function openCropperForCurrentImage() {
+            const currentSrc = document.getElementById('prodImage').value.trim();
+            if (!currentSrc) {
+                showAdminToast('لا توجد صورة لقصها حالياً');
+                return;
+            }
+            openCropModal(currentSrc, (croppedDataUrl) => {
+                finalizeCroppedImage(croppedDataUrl);
+            });
         }
 
         // يضغط الصورة تدريجياً: يبدأ بعرض معقول وجودة جيدة، وإذا الناتج لسا
@@ -2882,16 +3069,19 @@
         function updateImagePreview(src) {
             const img = document.getElementById('prodImagePreview');
             const hint = document.getElementById('prodImagePreviewHint');
+            const recropBtn = document.getElementById('recropBtn');
             if (src) {
                 img.src = src;
                 img.style.display = 'block';
                 hint.style.display = 'none';
                 hint.textContent = 'لا توجد صورة';
+                if (recropBtn) recropBtn.classList.add('show');
             } else {
                 img.src = '';
                 img.style.display = 'none';
                 hint.style.display = 'block';
                 hint.textContent = 'لا توجد صورة';
+                if (recropBtn) recropBtn.classList.remove('show');
             }
         }
 
@@ -3238,6 +3428,11 @@ body{background:#faf3f5;color:#1a1a1a;}
     window.toggleSidebar = toggleSidebar;
     window.saveProduct = saveProduct;
     window.handleImageFile = handleImageFile;
+    window.openCropModal = openCropModal;
+    window.closeCropModal = closeCropModal;
+    window.confirmCrop = confirmCrop;
+    window.setCropRatio = setCropRatio;
+    window.openCropperForCurrentImage = openCropperForCurrentImage;
     window.importData = importData;
     window.openAdminAccess = openAdminAccess;
     window.closeAdminOverlay = closeAdminOverlay;
