@@ -315,18 +315,22 @@
             gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
-            margin-top: 12px;
+            padding: 10px;
+            background: #f6ecef;
+            flex-shrink: 0;
         }
 
         .modal-thumb {
-            width: 60px;
-            height: 60px;
+            width: 56px;
+            height: 56px;
             border-radius: 8px;
             overflow: hidden;
-            border: 2px solid transparent;
+            border: 2px solid #ffffff;
             cursor: pointer;
-            background: #f6ecef;
+            background: #ffffff;
             flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+            transition: all 0.2s;
         }
 
         .modal-thumb img {
@@ -337,7 +341,8 @@
         }
 
         .modal-thumb.active {
-            border-color: var(--primary-pink);
+            border-color: #2196f3;
+            box-shadow: 0 0 0 2px rgba(33,150,243,0.35);
         }
 
         .product-info {
@@ -473,6 +478,16 @@
             min-height: 400px;
             background: #f6ecef;
             display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 0 20px 20px 0;
+        }
+
+        .modal-image-main {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
@@ -483,11 +498,11 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            border-radius: 0 20px 20px 0;
         }
 
         @media (max-width: 768px) {
-            .modal-image { border-radius: 20px 20px 0 0; height: 300px; }
+            .modal-image-section { border-radius: 20px 20px 0 0; }
+            .modal-image-main { height: 300px; flex: none; }
         }
 
         .modal-details {
@@ -1561,7 +1576,9 @@
             <button class="modal-close" onclick="closeProductModal()"><i class="fas fa-times"></i></button>
             <div class="modal-body">
                 <div class="modal-image-section">
-                    <img class="modal-image" id="modalImage" src="" alt="" onclick="event.stopPropagation(); openLightbox(this.src)">
+                    <div class="modal-image-main">
+                        <img class="modal-image" id="modalImage" src="" alt="" onclick="event.stopPropagation(); openLightbox(this.src)">
+                    </div>
                     <div class="modal-thumbs" id="modalThumbs"></div>
                 </div>
                 <div class="modal-details">
