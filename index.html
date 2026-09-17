@@ -269,6 +269,77 @@
             box-shadow: 0 4px 10px rgba(255, 59, 48, 0.4);
         }
 
+        .stock-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 2;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+        }
+
+        .product-card.out-of-stock .product-image {
+            opacity: 0.55;
+            filter: grayscale(55%);
+        }
+
+        .modal-stock-badge {
+            display: inline-block;
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 5px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .order-btn.disabled {
+            background: #bbbbbb;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .order-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .modal-thumbs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .modal-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            cursor: pointer;
+            background: #f6ecef;
+            flex-shrink: 0;
+        }
+
+        .modal-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .modal-thumb.active {
+            border-color: var(--primary-pink);
+        }
+
         .product-info {
             padding: 20px;
         }
@@ -1011,6 +1082,21 @@
         #adminOverlay .apc-thumb { width: 100%; aspect-ratio: 1 / 1; background: #f6ecef; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         #adminOverlay .apc-thumb img { width: 100%; height: 100%; object-fit: contain; }
         #adminOverlay .apc-discount { position: absolute; top: 8px; right: 8px; background: var(--red); color: #fff; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 20px; }
+        #adminOverlay .apc-stock-badge { position: absolute; top: 8px; left: 8px; background: #1a1a1a; color: #fff; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 20px; z-index: 2; }
+        #adminOverlay .images-gallery { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        #adminOverlay .img-thumb-item { position: relative; width: 80px; height: 80px; border-radius: 10px; overflow: hidden; border: 2px solid var(--border-color); flex-shrink: 0; }
+        #adminOverlay .img-thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        #adminOverlay .img-thumb-item.is-cover { border-color: var(--primary-pink); }
+        #adminOverlay .cover-badge { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(233,30,99,0.85); color: #fff; font-size: 9px; text-align: center; padding: 2px 0; }
+        #adminOverlay .thumb-remove-btn, #adminOverlay .thumb-star-btn { position: absolute; top: 3px; width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,0.6); color: #fff; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+        #adminOverlay .thumb-remove-btn { left: 3px; }
+        #adminOverlay .thumb-star-btn { right: 3px; background: rgba(233,30,99,0.8); }
+        #adminOverlay .img-thumb-add { width: 80px; height: 80px; border-radius: 10px; border: 2px dashed var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-gray); cursor: pointer; font-size: 20px; flex-shrink: 0; }
+        #adminOverlay .img-thumb-add:hover { border-color: var(--primary-pink); color: var(--primary-pink); }
+        #adminOverlay .stock-toggle-row { display: flex; align-items: center; gap: 10px; padding: 12px; background: #faf8f9; border-radius: 10px; border: 1px solid var(--border-color); }
+        #adminOverlay .stock-toggle-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        #adminOverlay .pd-stock-btn { background: rgba(255,149,0,0.12); color: #ff9500; grid-column: 1 / -1; }
+        #adminOverlay .pd-stock-btn:hover { background: #ff9500; color: #fff; }
         #adminOverlay .apc-body { padding: 10px 12px 12px; }
         #adminOverlay .apc-name { font-size: 13.5px; font-weight: bold; color: var(--text-dark); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         #adminOverlay .apc-meta { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
@@ -1476,8 +1562,10 @@
             <div class="modal-body">
                 <div class="modal-image-section">
                     <img class="modal-image" id="modalImage" src="" alt="" onclick="event.stopPropagation(); openLightbox(this.src)">
+                    <div class="modal-thumbs" id="modalThumbs"></div>
                 </div>
                 <div class="modal-details">
+                    <div id="modalStockBadge"></div>
                     <h2 class="modal-product-name" id="modalProductName"></h2>
                     <div class="modal-price-section">
                         <span class="modal-old-price" id="modalOldPrice"></span>
@@ -1495,9 +1583,9 @@
                         <div class="colors-list" id="modalColors"></div>
                     </div>
 
-                    <button class="order-btn" onclick="openOrderModal()">
-                        <i class="fas fa-paper-plane"></i>
-                        اطلب المنتج الآن
+                    <button class="order-btn" id="orderBtn" onclick="openOrderModal()">
+                        <i class="fas fa-paper-plane" id="orderBtnIcon"></i>
+                        <span id="orderBtnText">اطلب المنتج الآن</span>
                     </button>
                 </div>
             </div>
@@ -1830,10 +1918,11 @@
 
             empty.style.display = 'none';
             grid.innerHTML = filtered.map(p => `
-                <div class="product-card" onclick="openProduct(${p.id})">
+                <div class="product-card ${p.outOfStock ? 'out-of-stock' : ''}" onclick="openProduct(${p.id})">
                     <div class="product-image-container">
                         <img class="product-image" src="${p.image}" alt="${p.name}" loading="lazy" onclick="event.stopPropagation(); openLightbox('${p.image}')" onerror="this.onerror=null;this.alt='تعذر تحميل الصورة';this.style.opacity='0.35';">
-                        <div class="discount-badge">خصم ${p.discount}</div>
+                        ${p.outOfStock ? '<div class="stock-badge">نفذ</div>' : ''}
+                        ${p.discount ? `<div class="discount-badge">خصم ${p.discount}</div>` : ''}
                     </div>
                     <div class="product-info">
                         <h3 class="product-name">${p.name}</h3>
@@ -1865,6 +1954,37 @@
             document.getElementById('modalImage').src = currentProduct.image;
             document.getElementById('modalDescription').textContent = currentProduct.description;
 
+            // معرض الصور: إذا المنتج عنده أكثر من صورة واحدة نعرض شريط صور مصغرة تحت الصورة الرئيسية
+            const galleryImages = (Array.isArray(currentProduct.images) && currentProduct.images.length)
+                ? currentProduct.images
+                : [currentProduct.image];
+            const thumbsBox = document.getElementById('modalThumbs');
+            if (galleryImages.length > 1) {
+                thumbsBox.style.display = 'flex';
+                thumbsBox.innerHTML = galleryImages.map((src, i) => 
+                    `<div class="modal-thumb ${i === 0 ? 'active' : ''}" onclick="event.stopPropagation(); selectModalImage('${src}', this)">
+                        <img src="${src}" alt="${currentProduct.name}" loading="lazy">
+                    </div>`
+                ).join('');
+            } else {
+                thumbsBox.style.display = 'none';
+                thumbsBox.innerHTML = '';
+            }
+
+            // شارة "نفذ": المنتج يبقى ظاهراً بالمتجر لكن نوضح أنه غير متوفر حالياً ونعطّل زر الطلب
+            const stockBadgeBox = document.getElementById('modalStockBadge');
+            const orderBtn = document.getElementById('orderBtn');
+            const orderBtnText = document.getElementById('orderBtnText');
+            if (currentProduct.outOfStock) {
+                stockBadgeBox.innerHTML = '<span class="modal-stock-badge">نفذ</span>';
+                orderBtn.classList.add('disabled');
+                orderBtnText.textContent = 'غير متوفر حالياً';
+            } else {
+                stockBadgeBox.innerHTML = '';
+                orderBtn.classList.remove('disabled');
+                orderBtnText.textContent = 'اطلب المنتج الآن';
+            }
+
             // Colors: إذا الأدمن ما ضاف ألوان للمنتج، نخفي القسم بالكامل ونتجاوز
             // شرط اختيار اللون عند الطلب.
             const colorsSection = document.getElementById('colorsSection');
@@ -1885,6 +2005,13 @@
         function closeProductModal() {
             document.getElementById('productModal').classList.remove('active');
             document.body.style.overflow = '';
+        }
+
+        // تبديل الصورة الرئيسية بالمودال عند الضغط على إحدى الصور المصغرة
+        function selectModalImage(src, thumbEl) {
+            document.getElementById('modalImage').src = src;
+            document.querySelectorAll('#modalThumbs .modal-thumb').forEach(t => t.classList.remove('active'));
+            if (thumbEl) thumbEl.classList.add('active');
         }
 
         // ===================== IMAGE LIGHTBOX =====================
@@ -1912,6 +2039,11 @@
 
         // ===================== ORDER =====================
         function openOrderModal() {
+            if (currentProduct && currentProduct.outOfStock) {
+                showToast('عذراً، هذا المنتج نفذ حالياً وغير متوفر للطلب');
+                return;
+            }
+
             // نطلب اختيار اللون فقط إذا المنتج فعلاً إله ألوان متوفرة.
             if (hasAvailableColors(currentProduct) && !selectedColor) {
                 showToast('الرجاء اختيار اللون أولاً');
@@ -2415,23 +2547,28 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">صورة المنتج *</label>
-                        <div class="image-upload-row">
-                            <div class="image-preview-box" id="prodImagePreviewBox">
-                                <img id="prodImagePreview" src="" alt="" style="display:none;" onerror="handleImageError()">
-                                <span id="prodImagePreviewHint">لا توجد صورة</span>
-                                <button type="button" class="recrop-btn" id="recropBtn" onclick="openCropperForCurrentImage()">
-                                    <i class="fas fa-crop-alt"></i> تعديل القص
+                        <label class="form-label">صور المنتج * (تكدر تضيف أكثر من صورة)</label>
+                        <div class="images-gallery" id="prodImagesGallery"></div>
+                        <div class="image-upload-controls">
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                                <input type="text" class="form-input" id="prodImageUrlInput" placeholder="الصق رابط صورة ثم اضغط إضافة" style="flex:1; min-width:180px;">
+                                <button type="button" class="btn btn-secondary" onclick="addImageFromUrl()">
+                                    <i class="fas fa-link"></i> إضافة من رابط
                                 </button>
                             </div>
-                            <div class="image-upload-controls">
-                                <input type="text" class="form-input" id="prodImage" placeholder="الصق رابط صورة (اختياري)" style="margin-bottom:10px;">
-                                <input type="file" id="prodImageFile" accept="image/*" style="display:none;" onchange="handleImageFile(this)">
-                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('prodImageFile').click()">
-                                    <i class="fas fa-camera"></i> رفع صورة من الجهاز
-                                </button>
-                                <p class="image-hint">تكدر تلصق رابط صورة من الإنترنت أو ترفع صورة مباشرة من كاميرا جهازك أو معرض الصور — مو شرط رابط. بعد رفع الصورة راح تنفتح أداة قص احترافية قبل الحفظ.</p>
-                            </div>
+                            <input type="file" id="prodImageFile" accept="image/*" style="display:none;" onchange="handleImageFile(this)">
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('prodImageFile').click()">
+                                <i class="fas fa-camera"></i> رفع صورة من الجهاز
+                            </button>
+                            <p class="image-hint">تكدر تلصق رابط صورة من الإنترنت أو ترفع صورة مباشرة من كاميرا جهازك أو معرض الصور، وتكرر هذا لإضافة أكثر من صورة لنفس المنتج. أول صورة تضيفها تصير الصورة الرئيسية، وتكدر تغيّرها لاحقاً بالضغط على أيقونة النجمة تحت أي صورة أخرى. بعد رفع صورة من الجهاز راح تنفتح أداة قص احترافية قبل إضافتها.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">حالة توفر المنتج</label>
+                        <div class="stock-toggle-row">
+                            <input type="checkbox" id="prodOutOfStock">
+                            <label for="prodOutOfStock" style="cursor:pointer; margin:0;">المنتج نفذ حالياً (يبقى ظاهراً بالمتجر مع كلمة "نفذ" ولا يمكن طلبه)</label>
                         </div>
                     </div>
 
@@ -2509,7 +2646,9 @@
                 <div class="prod-details-row"><span>السعر قبل الخصم</span><span id="pdOldPrice"></span></div>
                 <div class="prod-details-row"><span>نسبة الخصم</span><span id="pdDiscount"></span></div>
                 <div class="prod-details-row"><span>الألوان المتوفرة</span><span id="pdColors"></span></div>
+                <div class="prod-details-row"><span>الحالة</span><span id="pdStock"></span></div>
                 <div class="prod-details-actions">
+                    <button class="pd-stock-btn" id="pdStockBtn"><i class="fas fa-box-open"></i> <span id="pdStockBtnText"></span></button>
                     <button class="pd-edit-btn" id="pdEditBtn"><i class="fas fa-pen"></i> تعديل</button>
                     <button class="pd-delete-btn" id="pdDeleteBtn"><i class="fas fa-trash"></i> حذف</button>
                 </div>
@@ -2624,16 +2763,12 @@
         let settings = {};
         let editingProductId = null;
         let tempColors = [];
+        let tempImages = [];
 
         // ===================== INIT =====================
         document.addEventListener('DOMContentLoaded', async () => {
             await loadAllData();
             checkLogin();
-
-            // live preview when a URL is typed/pasted directly
-            document.getElementById('prodImage').addEventListener('input', (e) => {
-                updateImagePreview(e.target.value.trim());
-            });
 
             // نسبة الخصم تُحسب تلقائياً من (السعر القديم - السعر الحالي)
             document.getElementById('prodPrice').addEventListener('input', updateAutoDiscount);
@@ -2811,6 +2946,7 @@
                     <div class="apc-thumb">
                         <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/200/f6ecef/999?text=NO+IMG'">
                     </div>
+                    ${p.outOfStock ? '<div class="apc-stock-badge">نفذ</div>' : ''}
                     ${p.discount ? `<div class="apc-discount">خصم ${p.discount}</div>` : ''}
                     <div class="apc-body">
                         <div class="apc-name" title="${p.name}">${p.name}</div>
@@ -2838,7 +2974,10 @@
             document.getElementById('pdOldPrice').textContent = p.oldPrice ? (p.oldPrice.toLocaleString('en-US') + ' د.ع') : '-';
             document.getElementById('pdDiscount').textContent = p.discount || '-';
             document.getElementById('pdColors').textContent = availableColors || 'لا يوجد';
+            document.getElementById('pdStock').textContent = p.outOfStock ? 'نفذ' : 'متوفر';
+            document.getElementById('pdStockBtnText').textContent = p.outOfStock ? 'إرجاعه متوفر' : 'تحديد كـ نفذ';
 
+            document.getElementById('pdStockBtn').onclick = () => toggleOutOfStock(p.id);
             document.getElementById('pdEditBtn').onclick = () => { closeProductDetails(); editProduct(p.id); };
             document.getElementById('pdDeleteBtn').onclick = () => { closeProductDetails(); deleteProduct(p.id); };
 
@@ -2855,7 +2994,10 @@
             document.getElementById('productModalTitle').innerHTML = '<i class="fas fa-plus"></i> إضافة منتج جديد';
             document.getElementById('productForm').reset();
             document.getElementById('productId').value = '';
-            updateImagePreview('');
+            document.getElementById('prodOutOfStock').checked = false;
+
+            tempImages = [];
+            renderImagesGallery();
 
             tempColors = [];
             renderTempColors();
@@ -2920,17 +3062,59 @@
         }
 
         // بعد قص الصورة (سواء صورة جديدة أو صورة كانت موجودة مسبقاً) نضغطها
-        // لحد آمن ونحدّث الحقل والمعاينة.
+        // لحد آمن ونضيفها لمعرض صور المنتج.
         function finalizeCroppedImage(croppedDataUrl) {
             const img = new Image();
             img.onload = () => {
                 const dataUrl = compressImageToLimit(img, 700 * 1024);
-                document.getElementById('prodImage').value = dataUrl;
-                updateImagePreview(dataUrl);
-                showAdminToast('تم قص الصورة بنجاح');
+                tempImages.push(dataUrl);
+                renderImagesGallery();
+                showAdminToast('تم قص الصورة وإضافتها بنجاح');
             };
             img.onerror = () => showAdminToast('تعذر معالجة الصورة بعد القص');
             img.src = croppedDataUrl;
+        }
+
+        // ---- إدارة معرض صور المنتج (أكثر من صورة واحدة) ----
+        function renderImagesGallery() {
+            const box = document.getElementById('prodImagesGallery');
+            if (!box) return;
+            box.innerHTML = tempImages.map((src, idx) => `
+                <div class="img-thumb-item ${idx === 0 ? 'is-cover' : ''}">
+                    <img src="${src}" alt="صورة ${idx + 1}" onerror="this.style.opacity='0.3';">
+                    ${idx === 0
+                        ? '<span class="cover-badge">رئيسية</span>'
+                        : `<button type="button" class="thumb-star-btn" onclick="setCoverImage(${idx})" title="تعيين كرئيسية"><i class="fas fa-star"></i></button>`}
+                    <button type="button" class="thumb-remove-btn" onclick="removeImage(${idx})" title="حذف الصورة"><i class="fas fa-times"></i></button>
+                </div>
+            `).join('') + `<div class="img-thumb-add" onclick="document.getElementById('prodImageFile').click()" title="إضافة صورة"><i class="fas fa-plus"></i></div>`;
+        }
+
+        // يجعل صورة معينة هي الصورة الرئيسية (أول صورة بالمعرض) عبر نقلها لبداية المصفوفة
+        function setCoverImage(idx) {
+            if (idx <= 0 || idx >= tempImages.length) return;
+            const [img] = tempImages.splice(idx, 1);
+            tempImages.unshift(img);
+            renderImagesGallery();
+        }
+
+        function removeImage(idx) {
+            tempImages.splice(idx, 1);
+            renderImagesGallery();
+        }
+
+        // إضافة صورة من رابط خارجي (بدون قص، تُضاف مباشرة للمعرض)
+        function addImageFromUrl() {
+            const input = document.getElementById('prodImageUrlInput');
+            const url = input.value.trim();
+            if (!url) {
+                showAdminToast('الرجاء لصق رابط الصورة أولاً');
+                return;
+            }
+            tempImages.push(url);
+            renderImagesGallery();
+            input.value = '';
+            showAdminToast('تمت إضافة الصورة');
         }
 
         // ================= CROPPER (قص الصور) =================
@@ -3103,18 +3287,22 @@
             const oldPrice = parseInt(document.getElementById('prodOldPrice').value);
             updateAutoDiscount(); // تأكيد حساب الخصم قبل الحفظ
             const discount = document.getElementById('prodDiscount').value.trim();
-            const image = document.getElementById('prodImage').value.trim();
             const description = document.getElementById('prodDesc').value.trim();
+            const outOfStock = document.getElementById('prodOutOfStock').checked;
 
-            if (!image) {
-                showAdminToast('الرجاء إضافة صورة للمنتج (رابط أو رفع من الجهاز)');
+            if (!tempImages.length) {
+                showAdminToast('الرجاء إضافة صورة واحدة على الأقل للمنتج (رابط أو رفع من الجهاز)');
                 return;
             }
 
             const productData = {
                 id: editingProductId || Date.now(),
-                name, category, price, oldPrice, discount, image, description,
-                colors: [...tempColors]
+                name, category, price, oldPrice, discount,
+                image: tempImages[0],
+                images: [...tempImages],
+                description,
+                colors: [...tempColors],
+                outOfStock
             };
 
             if (editingProductId) {
@@ -3142,9 +3330,11 @@
             document.getElementById('prodPrice').value = p.price;
             document.getElementById('prodOldPrice').value = p.oldPrice;
             updateAutoDiscount();
-            document.getElementById('prodImage').value = p.image || '';
             document.getElementById('prodDesc').value = p.description || '';
-            updateImagePreview(p.image || '');
+            document.getElementById('prodOutOfStock').checked = !!p.outOfStock;
+
+            tempImages = (Array.isArray(p.images) && p.images.length) ? [...p.images] : (p.image ? [p.image] : []);
+            renderImagesGallery();
 
             const catSelect = document.getElementById('prodCategory');
             catSelect.innerHTML = categories.filter(c => c.id !== 'all').map(c => 
@@ -3155,6 +3345,18 @@
             renderTempColors();
 
             document.getElementById('admProductModal').classList.add('active');
+        }
+
+        // تحديد/إلغاء تحديد المنتج كـ "نفذ" — المنتج يبقى ظاهراً بالمتجر دائماً،
+        // فقط تظهر عليه كلمة "نفذ" ويتعطل زر الطلب لدى الزبون.
+        function toggleOutOfStock(id) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            p.outOfStock = !p.outOfStock;
+            saveOneProductData(p);
+            renderProductsTable();
+            showProductDetails(id);
+            showAdminToast(p.outOfStock ? 'تم تحديد المنتج كـ نفذ' : 'تم إرجاع المنتج كمتوفر');
         }
 
         function deleteProduct(id) {
@@ -3341,8 +3543,9 @@
             const cats = categories.map(c => `<button class="cb" data-c="${c.id}">${c.name}</button>`).join('');
             const prods = products.map(p => {
                 const disc = p.discount ? `<div class="db">خصم ${p.discount}</div>` : '';
+                const stock = p.outOfStock ? `<div class="sb">نفذ</div>` : '';
                 const oldP = p.oldPrice ? `<span class="op">${p.oldPrice.toLocaleString('en-US')} د.ع</span>` : '';
-                return `<div class="pc"><div class="iw"><img src="${p.image}" alt="${p.name}" loading="lazy">${disc}</div><div class="pi"><h3>${p.name}</h3><div class="pr">${oldP}<span class="cp">${p.price.toLocaleString('en-US')} <small>د.ع</small></span></div></div></div>`;
+                return `<div class="pc"><div class="iw"><img src="${p.image}" alt="${p.name}" loading="lazy">${stock}${disc}</div><div class="pi"><h3>${p.name}</h3><div class="pr">${oldP}<span class="cp">${p.price.toLocaleString('en-US')} <small>د.ع</small></span></div></div></div>`;
             }).join('');
 
             return `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${settings.storeName}</title>
@@ -3436,6 +3639,10 @@ body{background:#faf3f5;color:#1a1a1a;}
     window.importData = importData;
     window.openAdminAccess = openAdminAccess;
     window.closeAdminOverlay = closeAdminOverlay;
+    window.setCoverImage = setCoverImage;
+    window.removeImage = removeImage;
+    window.addImageFromUrl = addImageFromUrl;
+    window.toggleOutOfStock = toggleOutOfStock;
 })();
 
     </script>
