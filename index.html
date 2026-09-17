@@ -1103,9 +1103,11 @@
         #adminOverlay .img-thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
         #adminOverlay .img-thumb-item.is-cover { border-color: var(--primary-pink); }
         #adminOverlay .cover-badge { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(233,30,99,0.85); color: #fff; font-size: 9px; text-align: center; padding: 2px 0; }
-        #adminOverlay .thumb-remove-btn, #adminOverlay .thumb-star-btn { position: absolute; top: 3px; width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,0.6); color: #fff; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
-        #adminOverlay .thumb-remove-btn { left: 3px; }
-        #adminOverlay .thumb-star-btn { right: 3px; background: rgba(233,30,99,0.8); }
+        #adminOverlay .thumb-remove-btn, #adminOverlay .thumb-star-btn { position: absolute; top: 4px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; color: #fff; font-size: 14px; font-weight: bold; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+        #adminOverlay .thumb-remove-btn { left: 4px; background: #ff3b30; }
+        #adminOverlay .thumb-star-btn { right: 4px; background: #e91e63; font-size: 12px; }
+        #adminOverlay .thumb-remove-btn:hover { background: #d6291f; transform: scale(1.1); }
+        #adminOverlay .thumb-star-btn:hover { background: #c2185b; transform: scale(1.1); }
         #adminOverlay .img-thumb-add { width: 80px; height: 80px; border-radius: 10px; border: 2px dashed var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-gray); cursor: pointer; font-size: 20px; flex-shrink: 0; }
         #adminOverlay .img-thumb-add:hover { border-color: var(--primary-pink); color: var(--primary-pink); }
         #adminOverlay .stock-toggle-row { display: flex; align-items: center; gap: 10px; padding: 12px; background: #faf8f9; border-radius: 10px; border: 1px solid var(--border-color); }
@@ -3101,8 +3103,8 @@
                     <img src="${src}" alt="صورة ${idx + 1}" onerror="this.style.opacity='0.3';">
                     ${idx === 0
                         ? '<span class="cover-badge">رئيسية</span>'
-                        : `<button type="button" class="thumb-star-btn" onclick="setCoverImage(${idx})" title="تعيين كرئيسية"><i class="fas fa-star"></i></button>`}
-                    <button type="button" class="thumb-remove-btn" onclick="removeImage(${idx})" title="حذف الصورة"><i class="fas fa-times"></i></button>
+                        : `<button type="button" class="thumb-star-btn" onclick="setCoverImage(${idx})" title="تعيين كرئيسية">★</button>`}
+                    <button type="button" class="thumb-remove-btn" onclick="removeImage(${idx})" title="حذف الصورة">✕</button>
                 </div>
             `).join('') + `<div class="img-thumb-add" onclick="document.getElementById('prodImageFile').click()" title="إضافة صورة"><i class="fas fa-plus"></i></div>`;
         }
