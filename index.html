@@ -2667,9 +2667,9 @@
                 <div class="prod-details-row"><span>الألوان المتوفرة</span><span id="pdColors"></span></div>
                 <div class="prod-details-row"><span>الحالة</span><span id="pdStock"></span></div>
                 <div class="prod-details-actions">
-                    <button class="pd-stock-btn" id="pdStockBtn"><i class="fas fa-box-open"></i> <span id="pdStockBtnText"></span></button>
-                    <button class="pd-edit-btn" id="pdEditBtn"><i class="fas fa-pen"></i> تعديل</button>
-                    <button class="pd-delete-btn" id="pdDeleteBtn"><i class="fas fa-trash"></i> حذف</button>
+                    <button type="button" class="pd-stock-btn" id="pdStockBtn"><i class="fas fa-box-open"></i> <span id="pdStockBtnText"></span></button>
+                    <button type="button" class="pd-edit-btn" id="pdEditBtn"><i class="fas fa-pen"></i> تعديل</button>
+                    <button type="button" class="pd-delete-btn" id="pdDeleteBtn"><i class="fas fa-trash"></i> حذف</button>
                 </div>
             </div>
         </div>
@@ -3369,13 +3369,17 @@
         // تحديد/إلغاء تحديد المنتج كـ "نفذ" — المنتج يبقى ظاهراً بالمتجر دائماً،
         // فقط تظهر عليه كلمة "نفذ" ويتعطل زر الطلب لدى الزبون.
         function toggleOutOfStock(id) {
-            const p = products.find(x => x.id === id);
-            if (!p) return;
-            p.outOfStock = !p.outOfStock;
-            saveOneProductData(p);
-            renderProductsTable();
-            showProductDetails(id);
-            showAdminToast(p.outOfStock ? 'تم تحديد المنتج كـ نفذ' : 'تم إرجاع المنتج كمتوفر');
+            try {
+                const p = products.find(x => x.id === id);
+                if (!p) return;
+                p.outOfStock = !p.outOfStock;
+                saveOneProductData(p).catch(err => console.error('تعذر حفظ حالة التوفر:', err));
+                renderProductsTable();
+                showProductDetails(id);
+                showAdminToast(p.outOfStock ? 'تم تحديد المنتج كـ نفذ' : 'تم إرجاع المنتج كمتوفر');
+            } catch (err) {
+                console.error('حدث خطأ أثناء تحديث حالة المنتج:', err);
+            }
         }
 
         function deleteProduct(id) {
@@ -3662,6 +3666,7 @@ body{background:#faf3f5;color:#1a1a1a;}
     window.removeImage = removeImage;
     window.addImageFromUrl = addImageFromUrl;
     window.toggleOutOfStock = toggleOutOfStock;
+    window.showAdminToast = showAdminToast;
 })();
 
     </script>
